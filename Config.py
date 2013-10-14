@@ -15,7 +15,7 @@ class Config(ContentHandler):
         if name == "script":
             script = dict()
             script["path"] = [attrs.get("path", "")]
-            script["stop_on_error"] = Config.str2bool(self, attrs.get("stop_on_error", "false"))
+            script["stop_on_error"] = self.str2bool(attrs.get("stop_on_error", "false"))
             for attr in attrs.get("args", "").split():
                 script["path"].append(attr)
             self.scripts.append(script)

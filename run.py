@@ -17,13 +17,16 @@ if __name__ == "__main__":
     parser.setContentHandler(config)
     parser.parse(open(configpath))
 
-    if os.path.isdir("logs") == False:
+    if not os.path.isdir("logs"):
         os.mkdir("logs")
 
     for script in config.scripts:
-        path = config.date.strftime("logs/%F_%T-" + script["path"][0].replace("/", "_") + ".log")
-        logfile = open(path, "w")
-        status = subprocess.call(script["path"], stdout=logfile, stderr=subprocess.STDOUT)
-        logfile.close()
-        if status != 0 and script["stop_on_error"]:
-            os._exit(1)
+        logdirpath = "logs/" + script["path"][0].replace("/", "_")
+        if not os.path.isdir(logdirpath):
+            os.mkdir(logdirpath)
+
+        path = config.date.strftime(logdirpath + "/%F_%T.log")
+        with open(path, "w") as logfile:
+            status = subprocess.call(script["path"], stdout=logfile, stderr=subprocess.STDOUT)
+            if status != 0 and script["stop_on_error"]:
+                os._exit(1)
