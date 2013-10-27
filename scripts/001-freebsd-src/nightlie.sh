@@ -8,6 +8,6 @@ cd ${directory}
 
 git fetch upstream-github
 
-git merge upstream-github/stable/9
+git merge upstream-github/master
 
-git push origin stable/9
+git push origin soldierx/lattera/aslr

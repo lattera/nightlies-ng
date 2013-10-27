@@ -1,1 +1,15 @@
-<script path="/usr/bin/false" stop_on_error="true" />
+<options>
+    <directory path="scripts" />
+</options>
+
+<script name="FreeBSD_Source" />
+<script name="FreeBSD_Ports" />
+
+<script name="FreeBSD_Release">
+    <dependency name="FreeBSD_Source" />
+</script>
+
+<script name="FreeBSD_Poudriere">
+    <dependency name="FreeBSD_Ports" />
+    <dependency name="FreeBSD_Release" />
+</script>
