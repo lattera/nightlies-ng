@@ -1,0 +1,8 @@
+nightlies-ng
+============
+
+A modular build system with dependency tracking support for my FreeBSD dev server. This project is very much a
+work-in-progress. The goal is to eventually make this into a threaded build system so that independent build jobs
+can build in parallel.
+
+This code is targeted for Python 2.7. I haven't even tried Python 3.
