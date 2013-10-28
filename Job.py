@@ -28,6 +28,10 @@ class Job:
             job.name = script["name"]
             job.module = __import__(job.name, globals(), locals(), job.name, -1)
             exec("job.instance = job.module." + job.name + "()")
+            if script["forcetrue"]:
+                if config.debug:
+                    print "[*] Skipping job " + job.name + ". Setting status to true."
+                job.status = "true"
             jobs.append(job)
 
         for script in config.scripts:
@@ -41,6 +45,9 @@ class Job:
         return jobs
 
     def RunJob(self, config):
+        if not self.status == "init":
+            return
+
         if len(self.dependencies):
             for job in self.dependencies:
                 if job.status == "init":
@@ -51,10 +58,16 @@ class Job:
                         print "Job[" + self.name + "]: Dependency[" + job.name + "] failed. Skipping."
                     return False
 
+        if config.debug:
+            print "[+] Running " + self.name
+
         if self.instance.Run(self, config):
             self.status = "true"
         else:
             self.status = "false"
+
+        if config.debug:
+            print "[+] " + self.name + " finished with status: " + self.status
 
     def GetLogfile(self, config):
         now = datetime.datetime.now()

@@ -11,6 +11,7 @@ class FreeBSD_Poudriere:
         jail["ports"] = "local"
         jail["configfile"] = "11-current_amd64.ports.txt"
         jail["syncdir"] = "/tank/poudriere/packages/11-current_amd64"
+        jail["version"] = "11.0-CURRENT"
         self.jails.append(jail)
 
     def Run(self, job, config):
@@ -27,14 +28,18 @@ class FreeBSD_Poudriere:
                 if status != 0:
                     return False
 
-                status = subprocess.call([
+                args = [
                     "sudo",
                     "poudriere",
                     "jail",
                     "-c",
                     "-j", jail["name"],
                     "-p", jail["ports"],
-                ])
+                    "-v", jail["version"]
+                ]
+                if config.debug:
+                    print "[*] Creating jail. Args: " + ", ".join(args)
+                status = subprocess.call(args, stdout=logfile, stderr=subprocess.STDOUT)
                 if status != 0:
                     return False
 

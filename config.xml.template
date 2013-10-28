@@ -1,6 +1,8 @@
 <config version="1.0">
     <options>
         <directory path="scripts" />
+        <logdir path="/tmp/buildlogs" />
+        <debug value="true" />
     </options>
 
     <script name="FreeBSD_Source" />

@@ -25,7 +25,7 @@ class Config(ContentHandler):
                 if len(path):
                     sys.path.append(os.path.realpath(path))
             elif name == "debug":
-                self.debug = str2bool(attrs.get("value", ""))
+                self.debug = self.str2bool(attrs.get("value", ""))
             elif name == "logdir":
                 self.logdir = attrs.get("path", "/tmp")
             elif name == "lockfile":
@@ -37,12 +37,13 @@ class Config(ContentHandler):
             if name == "options":
                 self.isInOptions = True
             elif name == "script":
-                if self.str2bool(attrs.get("disabled", "false")):
+                if self.str2bool(attrs.get("disabled", "false")) and not self.str2bool(attrs.get("forcetrue", "false")):
                     return
                 self.isInScript = True
                 self.script = dict()
                 self.script["dependencies"] = list()
                 self.script["name"] = attrs.get("name", "")
+                self.script["forcetrue"] = self.str2bool(attrs.get("forcetrue", "false"))
 
     def endElement(self, name):
         if name == "options":

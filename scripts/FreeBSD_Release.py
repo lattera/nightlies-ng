@@ -31,7 +31,7 @@ class FreeBSD_Release:
                 return False
 
         for filename in os.listdir("/usr/obj/usr/src/release"):
-            if len(filename) > 3 and filename[-3:] == "txz":
+            if len(filename) > 3 and filename[-3:] in ["txz", "iso"]:
                 shutil.copy("/usr/obj/usr/src/release/" + filename, self.local_destdir)
 
         os.chdir(curdir)
