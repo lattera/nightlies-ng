@@ -1,7 +1,36 @@
+import os
+import sys
+import shutil
+import subprocess
+
 class FreeBSD_Release:
     def __init__(self):
-        print "Hello from FreeBSD_Release class!"
+        self.jobs = 7
+        self.kernel = "SEC"
+        self.local_destdir = "/src/release/pub/FreeBSD/snapshots/amd64/amd64/11.0-CURRENT"
 
     def Run(self, job, config):
-        print "The FreeBSD_Release class is being run!"
+        curdir = os.getcwd()
+        os.chdir("/usr/src")
+        
+        status = subprocess.call(["make", "-DNO_CLEAN", "-sj" + str(self.jobs), "KERNCONF=" + self.kernel, "buildworld", "buildkernel"])
+        if status != 0:
+            os.chdir(curdir)
+            return False
+
+        os.chdir("/usr/src/release")
+        status = subprocess.call(["sudo", "make", "clean"])
+        if status != 0:
+            os.chdir(curdir)
+            return False
+
+        status = subprocess.call(["sudo", "make", "-s", "KERNCONF=" + self.kernel, "release"])
+        if status != 0:
+            os.chdir(curdir)
+            return False
+
+        for filename in os.listdir("/usr/obj/usr/src/release"):
+            shutil.copy("/usr/obj/usr/src/release/" + filename, self.local_destdir)
+
+        os.chdir(curdir)
         return True
