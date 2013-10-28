@@ -23,6 +23,8 @@ if __name__ == "__main__":
 
     config.applyConfig()
     jobs = Job.Job.InitializeJobs(config)
+    for job in jobs:
+        job.RunJob(config)
 
     if True == False:
         for script in config.scripts:
