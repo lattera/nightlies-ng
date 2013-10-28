@@ -16,6 +16,28 @@ class FreeBSD_Poudriere:
     def Run(self, job, config):
         with job.GetLogfile(config) as logfile:
             for jail in self.jails:
+                # Recreate the jail to pick up latest userland
+                status = subprocess.call([
+                    "sudo",
+                    "poudriere",
+                    "jail",
+                    "-j", jail["name"],
+                    "-d"
+                ], stdout=logfile, stderr=subprocess.STDOUT)
+                if status != 0:
+                    return False
+
+                status = subprocess.call([
+                    "sudo",
+                    "poudriere",
+                    "jail",
+                    "-c",
+                    "-j", jail["name"],
+                    "-p", jail["ports"],
+                ])
+                if status != 0:
+                    return False
+
                 status = subprocess.call([
                     "sudo",
                     "poudriere",

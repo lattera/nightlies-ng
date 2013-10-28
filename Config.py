@@ -13,6 +13,7 @@ class Config(ContentHandler):
         self.isInOptions = False
         self.isInScript = False
         self.logdir = "/tmp"
+        self.lockfile = "/tmp/nightly.lock"
 
     def str2bool(self, s):
         return s.lower() in ("yes", "true", "t", "1")
@@ -27,6 +28,8 @@ class Config(ContentHandler):
                 self.debug = str2bool(attrs.get("value", ""))
             elif name == "logdir":
                 self.logdir = attrs.get("path", "/tmp")
+            elif name == "lockfile":
+                self.lockfile = attrs.get("path", "/tmp/nightly.lock")
         elif self.isInScript:
             if name == "dependency":
                 self.script["dependencies"].append(attrs.get("name", ""))
