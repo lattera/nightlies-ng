@@ -16,20 +16,21 @@ class FreeBSD_Source:
         newdir = subprocess.check_output(["zfs", "get", "-H", "-ovalue", "mountpoint", self.dataset]).strip()
         os.chdir(newdir)
 
-        status = subprocess.call(["git", "fetch", self.upstream_remote])
-        if status != 0:
-            os.chdir(curdir)
-            return False
+        with job.GetLogfile(config) as logfile:
+            status = subprocess.call(["git", "fetch", self.upstream_remote], stdout=logfile, stderr=subprocess.STDOUT)
+            if status != 0:
+                os.chdir(curdir)
+                return False
 
-        status = subprocess.call(["git", "merge", "-m", self.commit_msg, self.upstream_remote + "/" + self.upstream_branch])
-        if status != 0:
-            os.chdir(curdir)
-            return False
+            status = subprocess.call(["git", "merge", "-m", self.commit_msg, self.upstream_remote + "/" + self.upstream_branch], stdout=logfile, stderr=subprocess.STDOUT)
+            if status != 0:
+                os.chdir(curdir)
+                return False
 
-        status = subprocess.call(["git", "push", self.push_to, self.local_branch])
-        if status != 0:
-            os.chdir(curdir)
-            return False
+            status = subprocess.call(["git", "push", self.push_to, self.local_branch], stdout=logfile, stderr=subprocess.STDOUT)
+            if status != 0:
+                os.chdir(curdir)
+                return False
 
-        os.chdir(curdir)
-        return True
+            os.chdir(curdir)
+            return True

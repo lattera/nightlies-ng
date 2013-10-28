@@ -1,6 +1,7 @@
 import os
 import Config
 import sys
+import datetime
 
 class Job:
     def __init__(self):
@@ -20,7 +21,7 @@ class Job:
 
     @staticmethod
     def InitializeJobs(config):
-        sys.path.append(os.path.realpath(config.scriptpath))
+        #sys.path.append(os.path.realpath(config.scriptpath))
         jobs = list()
         for script in config.scripts:
             job = Job()
@@ -54,3 +55,11 @@ class Job:
             self.status = "true"
         else:
             self.status = "false"
+
+    def GetLogfile(self, config):
+        now = datetime.datetime.now()
+        logdir = "{}/{}".format(config.logdir, self.name)
+        if not os.path.isdir(logdir):
+            os.mkdirs(logdir)
+        filename = "{}/{}_{}_{}_{}:{}:{}".format(logdir, now.year, now.month, now.day, now.hour, now.minute, now.second);
+        return open(filename, "w")

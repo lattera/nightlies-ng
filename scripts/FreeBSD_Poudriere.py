@@ -14,26 +14,27 @@ class FreeBSD_Poudriere:
         self.jails.append(jail)
 
     def Run(self, job, config):
-        for jail in self.jails:
-            status = subprocess.call([
-                "sudo",
-                "poudriere",
-                "bulk",
-                "-f", self.config_dir + "/" + jail["configfile"],
-                "-j", jail["name"],
-                "-p", jail["ports"]
-            ])
-            if status != 0:
-                return False
+        with job.GetLogfile(config) as logfile:
+            for jail in self.jails:
+                status = subprocess.call([
+                    "sudo",
+                    "poudriere",
+                    "bulk",
+                    "-f", self.config_dir + "/" + jail["configfile"],
+                    "-j", jail["name"],
+                    "-p", jail["ports"]
+                ], stdout=logfile, stderr=subprocess.STDOUT)
+                if status != 0:
+                    return False
 
-            status = subprocess.call([
-                "sudo",
-                "rsync"
-                "-a",
-                self.poudriere_dir + "/data/packages" + jail["name"] + "-" + jail["ports"] + "/",
-                jail["syncdir"]
-            ])
-            if status != 0:
-                return False
+                status = subprocess.call([
+                    "sudo",
+                    "rsync"
+                    "-a",
+                    self.poudriere_dir + "/data/packages" + jail["name"] + "-" + jail["ports"] + "/",
+                    jail["syncdir"]
+                ], stdout=logfile, stderr=subprocess.STDOUT)
+                if status != 0:
+                    return False
 
-        return True
+            return True

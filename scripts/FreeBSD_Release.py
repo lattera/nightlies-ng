@@ -13,24 +13,26 @@ class FreeBSD_Release:
         curdir = os.getcwd()
         os.chdir("/usr/src")
         
-        status = subprocess.call(["make", "-DNO_CLEAN", "-sj" + str(self.jobs), "KERNCONF=" + self.kernel, "buildworld", "buildkernel"])
-        if status != 0:
-            os.chdir(curdir)
-            return False
+        with job.GetLogfile(config) as logfile:
+            status = subprocess.call(["make", "-DNO_CLEAN", "-sj" + str(self.jobs), "KERNCONF=" + self.kernel, "buildworld", "buildkernel"], stdout=logfile, stderr=subprocess.STDOUT)
+            if status != 0:
+                os.chdir(curdir)
+                return False
 
-        os.chdir("/usr/src/release")
-        status = subprocess.call(["sudo", "make", "clean"])
-        if status != 0:
-            os.chdir(curdir)
-            return False
+            os.chdir("/usr/src/release")
+            status = subprocess.call(["sudo", "make", "clean"], stdout=logfile, stderr=subprocess.STDOUT)
+            if status != 0:
+                os.chdir(curdir)
+                return False
 
-        status = subprocess.call(["sudo", "make", "-s", "KERNCONF=" + self.kernel, "release"])
-        if status != 0:
-            os.chdir(curdir)
-            return False
+            status = subprocess.call(["sudo", "make", "-s", "KERNCONF=" + self.kernel, "release"], stdout=logfile, stderr=subprocess.STDOUT)
+            if status != 0:
+                os.chdir(curdir)
+                return False
 
         for filename in os.listdir("/usr/obj/usr/src/release"):
-            shutil.copy("/usr/obj/usr/src/release/" + filename, self.local_destdir)
+            if len(filename) > 3 and filename[-3:] == "txz":
+                shutil.copy("/usr/obj/usr/src/release/" + filename, self.local_destdir)
 
         os.chdir(curdir)
         return True
