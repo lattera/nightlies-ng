@@ -10,6 +10,7 @@ class Job:
         self.status = "init"
         self.dependencies = list()
         self.instance = None
+        self.forcerun = False
 
     @staticmethod
     def GetJob(jobs, name):
@@ -30,8 +31,10 @@ class Job:
             exec("job.instance = job.module." + job.name + "()")
             if script["forcetrue"]:
                 if config.debug:
-                    print "[*] Skipping job " + job.name + ". Setting status to true."
-                job.status = "true"
+                    print "[*] Skipping job " + job.name + ". Setting status to skipped."
+                job.status = "skipped"
+            if "forcerun" in script:
+                job.forcerun = script["forcerun"]
             jobs.append(job)
 
         for script in config.scripts:
@@ -53,7 +56,7 @@ class Job:
                 if job.status == "init":
                     if job.RunJob(config) == False:
                         return False
-                elif job.status == "false":
+                elif job.status == "false" and not self.forcerun:
                     if config.debug:
                         print "Job[" + self.name + "]: Dependency[" + job.name + "] failed. Skipping."
                     return False

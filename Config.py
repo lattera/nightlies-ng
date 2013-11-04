@@ -37,8 +37,9 @@ class Config(ContentHandler):
             if name == "options":
                 self.isInOptions = True
             elif name == "script":
-                if self.str2bool(attrs.get("disabled", "false")) and not self.str2bool(attrs.get("forcetrue", "false")):
-                    return
+                if self.str2bool(attrs.get("disabled", "false")):
+                    if not self.str2bool(attrs.get("forcetrue", "false")) and not self.str2bool(attrs.get("forcerun", "false")):
+                        return
                 self.isInScript = True
                 self.script = dict()
                 self.script["dependencies"] = list()
