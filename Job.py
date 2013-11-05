@@ -7,10 +7,13 @@ class Job:
     def __init__(self):
         self.module = None
         self.name = ""
+        self.classname = ""
+        self.modulename = ""
         self.status = "init"
         self.dependencies = list()
         self.instance = None
         self.forcerun = False
+        self.options = dict()
 
     @staticmethod
     def GetJob(jobs, name):
@@ -27,8 +30,14 @@ class Job:
         for script in config.scripts:
             job = Job()
             job.name = script["name"]
-            job.module = __import__(job.name, globals(), locals(), job.name, -1)
-            exec("job.instance = job.module." + job.name + "()")
+            job.classname = script["class"]
+            job.modulename = script["module"]
+            if "options" in script:
+                job.options = script["options"]
+
+            job.module = __import__(job.modulename, globals(), locals(), job.classname, -1)
+            exec("job.instance = job.module." + job.classname + "()")
+
             if script["forcetrue"]:
                 if config.debug:
                     print "[*] Skipping job " + job.name + ". Setting status to skipped."
@@ -38,7 +47,7 @@ class Job:
             jobs.append(job)
 
         for script in config.scripts:
-            if len(script["dependencies"]):
+            if "dependencies" in script:
                 job = Job.GetJob(jobs, script["name"])
                 for dep in script["dependencies"]:
                     jobdep = Job.GetJob(jobs, dep)
@@ -76,6 +85,6 @@ class Job:
         now = datetime.datetime.now()
         logdir = "{}/{}".format(config.logdir, self.name)
         if not os.path.isdir(logdir):
-            os.mkdirs(logdir)
+            os.mkdir(logdir)
         filename = "{}/{}_{}_{}_{}:{}:{}".format(logdir, now.year, now.month, now.day, now.hour, now.minute, now.second);
         return open(filename, "w")

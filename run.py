@@ -2,12 +2,10 @@
 
 import os, sys, signal
 import subprocess
-from xml.sax import make_parser
+import json
 
-from Config import *
+import Config
 import Job
-
-config = Config()
 
 def sig_handler(signum, frame):
     if os.path.exists(config.lockfile):
@@ -15,15 +13,19 @@ def sig_handler(signum, frame):
     os._exit(0)
 
 def main():
+    jsonconfig = dict()
+
     signal.signal(signal.SIGINT, sig_handler)
     os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
-    configpath = "config.xml"
+
+    configpath = "config.json"
     if len(sys.argv) > 1:
         configpath = sys.argv[1]
 
-    parser = make_parser()
-    parser.setContentHandler(config)
-    parser.parse(open(configpath))
+    with open(configpath, "r") as configfile:
+        jsonconfig = json.loads(configfile.read())
+
+    config = Config.Config(jsonconfig)
 
     if os.path.exists(config.lockfile):
         return

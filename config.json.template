@@ -1,0 +1,38 @@
+{
+    "options": {
+        "directory": [ "/src/nightly-scripts" ],
+        "logdir": "/tmp/buildlogs",
+        "debug": true
+    },
+    "jobs": [
+        {
+            "name": "FreeBSD Source",
+            "module": "FreeBSD_Source",
+            "class": "Source"
+        },
+        {
+            "name": "FreeBSD Ports",
+            "module": "FreeBSD_Ports",
+            "class": "Ports"
+        },
+        {
+            "name": "FreeBSD Release",
+            "module": "FreeBSD_Release",
+            "class": "Release",
+            "dependencies": [ "FreeBSD Source", "FreeBSD Ports" ]
+        },
+        {
+            "name": "Poudriere",
+            "module": "FreeBSD_Poudriere",
+            "class": "Poudriere",
+            "dependencies": [ "FreeBSD Release" ]
+        },
+        {
+            "name": "Tweet",
+            "module": "Tweet",
+            "class": "Tweet",
+            "dependencies": "Poudriere",
+            "forcerun": true
+        }
+    ]
+}

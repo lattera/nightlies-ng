@@ -5,7 +5,7 @@ from xml.sax.handler import ContentHandler
 from datetime import datetime
 
 class Config(ContentHandler):
-    def __init__(self):
+    def __init__(self, jsonobj):
         self.scripts = list()
         self.script = dict()
         self.date = datetime.now()
@@ -15,44 +15,43 @@ class Config(ContentHandler):
         self.logdir = "/tmp"
         self.lockfile = "/tmp/nightly.lock"
 
-    def str2bool(self, s):
-        return s.lower() in ("yes", "true", "t", "1")
+        if "options" in jsonobj:
+            if "logdir" in jsonobj["options"]:
+                self.logdir = jsonobj["options"]["logdir"]
+            if "debug" in jsonobj["options"]:
+                self.debug = jsonobj["options"]["debug"]
+            if "directory" in jsonobj["options"]:
+                for directory in jsonobj["options"]["directory"]:
+                    sys.path.append(directory)
 
-    def startElement(self, name, attrs):
-        if self.isInOptions:
-            if name == "directory":
-                path = attrs.get("path", "")
-                if len(path):
-                    sys.path.append(os.path.realpath(path))
-            elif name == "debug":
-                self.debug = self.str2bool(attrs.get("value", ""))
-            elif name == "logdir":
-                self.logdir = attrs.get("path", "/tmp")
-            elif name == "lockfile":
-                self.lockfile = attrs.get("path", "/tmp/nightly.lock")
-        elif self.isInScript:
-            if name == "dependency":
-                self.script["dependencies"].append(attrs.get("name", ""))
-        else:
-            if name == "options":
-                self.isInOptions = True
-            elif name == "script":
-                if self.str2bool(attrs.get("disabled", "false")):
-                    if not self.str2bool(attrs.get("forcetrue", "false")) and not self.str2bool(attrs.get("forcerun", "false")):
-                        return
-                self.isInScript = True
-                self.script = dict()
-                self.script["dependencies"] = list()
-                self.script["name"] = attrs.get("name", "")
-                self.script["forcetrue"] = self.str2bool(attrs.get("forcetrue", "false"))
+        for job in jsonobj["jobs"]:
+            if "disabled" in job and job["disabled"]:
+                if not "forcerun" in job or not job["forcerun"]:
+                    continue
 
-    def endElement(self, name):
-        if name == "options":
-            self.isInOptions = False
-        elif name == "script":
-            self.isInScript = False
-            self.scripts.append(self.script)
+            script = dict()
+            # Defaults
+            script["forcetrue"] = False
+            script["forcerun"] = False
+
+            script["name"] = job["name"]
+            script["module"] = job["module"]
+            if "class" in job:
+                script["class"] = job["class"]
+            else:
+                script["class"] = job["module"]
+
+            if "options" in job:
+                script["options"] = job["options"]
+            if "dependencies" in job:
+                script["dependencies"] = job["dependencies"]
+            if "forcetrue" in job:
+                script["forcetrue"] = job["forcetrue"]
+            if "forcerun" in job:
+                script["forcerun"] = job["forcerun"]
+
+            self.scripts.append(script)
 
     def applyConfig(self):
         if not os.path.isdir(self.logdir):
-            os.mkdirs(self.logdir)
+            os.mkdir(self.logdir)
