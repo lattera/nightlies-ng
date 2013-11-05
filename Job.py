@@ -86,5 +86,5 @@ class Job:
         logdir = "{}/{}".format(config.logdir, self.name)
         if not os.path.isdir(logdir):
             os.mkdir(logdir)
-        filename = "{}/{}_{}_{}_{}:{}:{}".format(logdir, now.year, now.month, now.day, now.hour, now.minute, now.second);
+        filename = "{}/{}_{:02}_{:02}_{:02}:{:02}:{:02}".format(logdir, now.year, now.month, now.day, now.hour, now.minute, now.second);
         return open(filename, "w")
