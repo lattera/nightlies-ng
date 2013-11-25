@@ -38,7 +38,7 @@ class Job:
             job.module = __import__(job.modulename, globals(), locals(), job.classname, -1)
             exec("job.instance = job.module." + job.classname + "()")
 
-            if script["forcetrue"]:
+            if script["skip"]:
                 if config.debug:
                     print "[*] Skipping job " + job.name + ". Setting status to skipped."
                 job.status = "skipped"
@@ -58,6 +58,8 @@ class Job:
 
     def RunJob(self, config):
         if not self.status == "init":
+            if self.status == "skipped":
+                config.irc.broadcast_message("[" + self.name + "]: Skpped");
             return
 
         if len(self.dependencies):
@@ -80,6 +82,8 @@ class Job:
 
         if config.debug:
             print "[+] " + self.name + " finished with status: " + self.status
+
+        config.irc.broadcast_message("[" + self.name + "]: " + self.status);
 
     def GetLogfile(self, config):
         now = datetime.datetime.now()

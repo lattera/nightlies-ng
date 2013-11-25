@@ -4,35 +4,41 @@
         "logdir": "/tmp/buildlogs",
         "debug": true
     },
+    "irc": {
+        "path": "/usr/home/shawn/irc",
+        "networks": [
+            {
+                "name": "irc.binrev.net",
+                "channels": [ "#aslrbsd" ]
+            }
+        ]
+    },
     "jobs": [
         {
             "name": "FreeBSD Source",
             "module": "FreeBSD_Source",
-            "class": "Source"
+            "class": "Source",
+            "skip": true
         },
         {
             "name": "FreeBSD Ports",
             "module": "FreeBSD_Ports",
-            "class": "Ports"
+            "class": "Ports",
+            "skip": true
         },
         {
             "name": "FreeBSD Release",
             "module": "FreeBSD_Release",
             "class": "Release",
-            "dependencies": [ "FreeBSD Source", "FreeBSD Ports" ]
+            "dependencies": [ "FreeBSD Source", "FreeBSD Ports" ],
+            "skip": true
         },
         {
             "name": "Poudriere",
             "module": "FreeBSD_Poudriere",
             "class": "Poudriere",
-            "dependencies": [ "FreeBSD Release" ]
-        },
-        {
-            "name": "Tweet",
-            "module": "Tweet",
-            "class": "Tweet",
-            "dependencies": "Poudriere",
-            "forcerun": true
+            "dependencies": [ "FreeBSD Release" ],
+            "skip": true
         }
     ]
 }

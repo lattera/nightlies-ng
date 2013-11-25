@@ -4,16 +4,17 @@ from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 from datetime import datetime
 
+import IRC
+
 class Config(ContentHandler):
     def __init__(self, jsonobj):
         self.scripts = list()
         self.script = dict()
         self.date = datetime.now()
         self.debug = False
-        self.isInOptions = False
-        self.isInScript = False
         self.logdir = "/tmp"
         self.lockfile = "/tmp/nightly.lock"
+        self.irc = IRC.IRC(jsonobj)
 
         if "options" in jsonobj:
             if "logdir" in jsonobj["options"]:
@@ -31,7 +32,7 @@ class Config(ContentHandler):
 
             script = dict()
             # Defaults
-            script["forcetrue"] = False
+            script["skip"] = False
             script["forcerun"] = False
 
             script["name"] = job["name"]
@@ -45,8 +46,8 @@ class Config(ContentHandler):
                 script["options"] = job["options"]
             if "dependencies" in job:
                 script["dependencies"] = job["dependencies"]
-            if "forcetrue" in job:
-                script["forcetrue"] = job["forcetrue"]
+            if "skip" in job:
+                script["skip"] = job["skip"]
             if "forcerun" in job:
                 script["forcerun"] = job["forcerun"]
 
