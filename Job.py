@@ -66,14 +66,23 @@ class Job:
             for job in self.dependencies:
                 if job.status == "init":
                     if job.RunJob(config) == False:
-                        return False
+                        config.irc.broadcast_message("Job[" + self.name + "]: Dependency[" + job.name + "] failed. Skipping myself.")
+                        self.status = "skipped"
+                        break
                 elif job.status == "false" and not self.forcerun:
                     if config.debug:
-                        print "Job[" + self.name + "]: Dependency[" + job.name + "] failed. Skipping."
-                    return False
+                        print "Job[" + self.name + "]: Dependency[" + job.name + "] failed. Skipping myself."
+                    self.status = "skipped"
+                    config.irc.broadcast_message("Job[" + self.name + "]: Dependency[" + job.name + "] failed. Skipping myself.")
+                    break
+
+        if self.status == "skipped":
+            return False
 
         if config.debug:
             print "[+] Running " + self.name
+
+        config.irc.broadcast_message("Job[" + self.name + "]: Starting.");
 
         if self.instance.Run(self, config):
             self.status = "true"
@@ -83,7 +92,9 @@ class Job:
         if config.debug:
             print "[+] " + self.name + " finished with status: " + self.status
 
-        config.irc.broadcast_message("[" + self.name + "]: " + self.status);
+        config.irc.broadcast_message("Job[" + self.name + "]: Finished: " + self.status)
+
+        return self.status == "true"
 
     def GetLogfile(self, config):
         now = datetime.datetime.now()
